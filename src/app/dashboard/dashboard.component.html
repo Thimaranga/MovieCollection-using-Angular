@@ -1,0 +1,247 @@
+<div class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">Movies Collection</a>
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-toggle="collapse"
+    data-target="#navbarSupportedContent"
+    aria-controls="navbarSupportedContent"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="/dashboard"
+          >Dashboard <span class="sr-only">(current)</span></a
+        >
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" (click)="openDialog()">Add Movies</a>
+      </li>
+    </ul>
+
+    <form class="form-inline my-2 my-lg-0" #userForm="ngForm" (ngSubmit)="isCheck(userForm)">
+      <input
+        class="form-control mr-sm-2"
+        type="text"
+        name="search"
+        autocomplete="off"
+        placeholder="Search Here"
+        ngModel
+      />
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+        Search
+      </button>
+    </form>
+
+    <div *ngIf="afAuth.user" class="ml-lg-5">
+      <button type="button" class="btn btn-outline-danger" (click)="logout()">
+        Logout
+      </button>
+    </div>
+  </div>
+</div>
+
+<ng-template #callAPIDialog>
+  <form #userForm="ngForm" (ngSubmit)="onSend(userForm)">
+    <label class="navbar-brand" style="color: rgb(89, 93, 97)"
+      >Add a new Movie</label
+    >
+    <div class="form-group">
+      <input
+        type="text"
+        class="form-control"
+        id="exampleInputTitle"
+        name="mName"
+        aria-describedby="emailHelp"
+        placeholder="Movie Title"
+        ngModel
+        required
+      />
+    </div>
+    <div class="form-group">
+      <input
+        type="text"
+        class="form-control"
+        id="exampleInputCategory"
+        name="mCategory"
+        placeholder="Category"
+        ngModel
+        required
+      />
+    </div>
+    <div class="form-group">
+      <input
+        type="text"
+        class="form-control"
+        id="exampleInputRating"
+        name="mRating"
+        placeholder="IMDb: Rating"
+        ngModel
+        required
+      />
+    </div>
+    <div class="form-group">
+      <input
+        type="text"
+        class="form-control"
+        id="exampleInputDescription"
+        name="mDescription"
+        placeholder="Description"
+        ngModel
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="exampleFormControlFile1">Insert a cover photo here</label>
+      <input
+        type="file"
+        class="form-control-file"
+        id="exampleFormControlFile"
+        name="mImage"
+        ngModel
+        required
+      />
+    </div>
+    <mat-dialog-actions align="end">
+      <button mat-button matDialogClose="no">Cancel</button>
+      <button type="submit" class="btn btn-primary" mat-button>Submit</button>
+    </mat-dialog-actions>
+  </form>
+</ng-template>
+
+<ng-template #callAPIDialogEdit>
+  <form #userForm="ngForm" (ngSubmit)="Updatarecord(userForm)">
+    <label class="navbar-brand" style="color: rgb(89, 93, 97)"
+      >Edit Movie</label
+    >
+    <div class="card">
+      <img
+        src="https://material.angular.io/assets/img/examples/shiba2.jpg"
+        alt="..."
+        class="img-thumbnail"
+      />
+    </div>
+
+    <div class="form-group">
+      <input
+        type="text"
+        class="form-control"
+        id="exampleInputTitle"
+        name="mName"
+        aria-describedby="emailHelp"
+        placeholder="Movie Title"
+        [(ngModel)]="mName"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <input
+        type="text"
+        class="form-control"
+        id="exampleInputCategory"
+        name="mCategory"
+        placeholder="Category"
+        [(ngModel)]="mCategory"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <input
+        type="text"
+        class="form-control"
+        id="exampleInputRating"
+        name="mRating"
+        placeholder="IMDb: Rating"
+        [(ngModel)]="mRating"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <input
+        type="text"
+        class="form-control"
+        id="exampleInputDescription"
+        name="mDescription"
+        placeholder="Description"
+        [(ngModel)]="mDescription"
+        required
+      />
+    </div>
+    <div class="form-group">
+      <label for="exampleFormControlFile1">Insert a cover photo here</label>
+      <input
+        type="file"
+        class="form-control-file"
+        id="exampleFormControlFile"
+        name="mImage"
+      />
+    </div>
+    <mat-dialog-actions align="end">
+      <button mat-button matDialogClose="no">Cancel</button>
+      <button type="submit" class="btn btn-primary" mat-button>Submit</button>
+    </mat-dialog-actions>
+  </form>
+</ng-template>
+
+<!-- <ng-template #callAPIDialog>
+    <form #userForm="ngForm" (ngSubmit)="onSend(userForm)">
+    <h2 matDialogTitle>Add Organization</h2> 
+        <input  matInput type="text" placeholder="Your organization" name="organisationName" ngModel required >
+        <input matInput type="text" name="enabled" ngModel required>          
+    <mat-dialog-actions align="end">
+        <button mat-button matDialogClose="no">Cancel</button>
+        <button type="submit" mat-button>Submit</button>
+    </mat-dialog-actions>
+  </form>
+  </ng-template> -->
+
+<div class="card-container d-flex p-lg-4">
+  <mat-card class="card mr-lg-4" *ngFor="let item of listedMovies | filter:searchText">
+    <mat-card-title-group>
+      <mat-card-title
+        ><b>{{ item.title }}</b></mat-card-title
+      >
+      <mat-card-subtitle>{{ item.category }}</mat-card-subtitle>
+      <img
+        mat-card-xl-image
+        src="https://material.angular.io/assets/img/examples/shiba2.jpg"
+      />
+    </mat-card-title-group>
+    <mat-card-content>
+      {{ item.description }}
+    </mat-card-content>
+    <button
+      type="button"
+      class="btn btn-outline-warning mr-2"
+      (click)="onEdit(item)"
+    >
+      Edit
+    </button>
+    <button
+      type="button"
+      class="btn btn-outline-danger"
+      (click)="deleteMovie(item.id)"
+    >
+      Delete
+    </button>
+  </mat-card>
+
+  <!-- <mat-card class="card">
+    <mat-card-title-group>
+      <mat-card-title><b>Shiba Inu</b></mat-card-title>
+      <mat-card-subtitle>Extra large</mat-card-subtitle>
+      <img
+        mat-card-xl-image
+        src="https://material.angular.io/assets/img/examples/shiba1.jpg"
+      />
+    </mat-card-title-group>
+    <mat-card-content>
+      {{ longText }}
+    </mat-card-content>
+  </mat-card> -->
+</div>
