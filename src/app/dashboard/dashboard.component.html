@@ -24,7 +24,11 @@
       </li>
     </ul>
 
-    <form class="form-inline my-2 my-lg-0" #userForm="ngForm" (ngSubmit)="isCheck(userForm)">
+    <form
+      class="form-inline my-2 my-lg-0"
+      #userForm="ngForm"
+      (ngSubmit)="isCheck(userForm)"
+    >
       <input
         class="form-control mr-sm-2"
         type="text"
@@ -100,12 +104,26 @@
       <label for="exampleFormControlFile1">Insert a cover photo here</label>
       <input
         type="file"
+        accept=".jpg,.png"
         class="form-control-file"
         id="exampleFormControlFile"
-        name="mImage"
-        ngModel
-        required
+        name="eImage"
+        (change)="uploadImage($event)"
       />
+    </div>
+
+    <div *ngIf="persentage | async as pct">
+      <div *ngIf="pct == 100" class="alert alert-success">
+        Upload Successfuly !
+      </div>
+      <div class="uk-progress">
+        <progress
+          id="js-progressbar"
+          class="progress-bar bg-info"
+          [value]="pct"
+          max="100"
+        ></progress>
+      </div>
     </div>
     <mat-dialog-actions align="end">
       <button mat-button matDialogClose="no">Cancel</button>
@@ -121,7 +139,7 @@
     >
     <div class="card">
       <img
-        src="https://material.angular.io/assets/img/examples/shiba2.jpg"
+        [src]="getSantizeUrl(tempUrlForUpdate)"
         alt="..."
         class="img-thumbnail"
       />
@@ -132,10 +150,10 @@
         type="text"
         class="form-control"
         id="exampleInputTitle"
-        name="mName"
-        aria-describedby="emailHelp"
+        name="eName"
         placeholder="Movie Title"
         [(ngModel)]="mName"
+        ngModel
         required
       />
     </div>
@@ -144,9 +162,10 @@
         type="text"
         class="form-control"
         id="exampleInputCategory"
-        name="mCategory"
+        name="eCategory"
         placeholder="Category"
         [(ngModel)]="mCategory"
+        ngModel
         required
       />
     </div>
@@ -155,9 +174,10 @@
         type="text"
         class="form-control"
         id="exampleInputRating"
-        name="mRating"
+        name="eRating"
         placeholder="IMDb: Rating"
         [(ngModel)]="mRating"
+        ngModel
         required
       />
     </div>
@@ -166,9 +186,10 @@
         type="text"
         class="form-control"
         id="exampleInputDescription"
-        name="mDescription"
+        name="eDescription"
         placeholder="Description"
         [(ngModel)]="mDescription"
+        ngModel
         required
       />
     </div>
@@ -176,11 +197,28 @@
       <label for="exampleFormControlFile1">Insert a cover photo here</label>
       <input
         type="file"
+        accept=".jpg,.png"
         class="form-control-file"
         id="exampleFormControlFile"
-        name="mImage"
+        name="eImage"
+        (change)="uploadImage($event)"
       />
     </div>
+
+    <div *ngIf="persentage | async as pct">
+      <div *ngIf="pct == 100" class="alert alert-success">
+        Upload Successfuly !
+      </div>
+      <div class="progress">
+        <progress
+          id="js-progressbar"
+          class="uk-progress"
+          [value]="pct"
+          max="100"
+        ></progress>
+      </div>
+    </div>
+
     <mat-dialog-actions align="end">
       <button mat-button matDialogClose="no">Cancel</button>
       <button type="submit" class="btn btn-primary" mat-button>Submit</button>
@@ -188,29 +226,17 @@
   </form>
 </ng-template>
 
-<!-- <ng-template #callAPIDialog>
-    <form #userForm="ngForm" (ngSubmit)="onSend(userForm)">
-    <h2 matDialogTitle>Add Organization</h2> 
-        <input  matInput type="text" placeholder="Your organization" name="organisationName" ngModel required >
-        <input matInput type="text" name="enabled" ngModel required>          
-    <mat-dialog-actions align="end">
-        <button mat-button matDialogClose="no">Cancel</button>
-        <button type="submit" mat-button>Submit</button>
-    </mat-dialog-actions>
-  </form>
-  </ng-template> -->
-
 <div class="card-container d-flex p-lg-4">
-  <mat-card class="card mr-lg-4" *ngFor="let item of listedMovies | filter:searchText">
+  <mat-card
+    class="card mr-lg-4"
+    *ngFor="let item of listedMovies | filter: searchText"
+  >
     <mat-card-title-group>
       <mat-card-title
         ><b>{{ item.title }}</b></mat-card-title
       >
       <mat-card-subtitle>{{ item.category }}</mat-card-subtitle>
-      <img
-        mat-card-xl-image
-        src="https://material.angular.io/assets/img/examples/shiba2.jpg"
-      />
+      <img mat-card-xl-image [src]="getSantizeUrl(item.imageURL)" />
     </mat-card-title-group>
     <mat-card-content>
       {{ item.description }}
@@ -230,18 +256,4 @@
       Delete
     </button>
   </mat-card>
-
-  <!-- <mat-card class="card">
-    <mat-card-title-group>
-      <mat-card-title><b>Shiba Inu</b></mat-card-title>
-      <mat-card-subtitle>Extra large</mat-card-subtitle>
-      <img
-        mat-card-xl-image
-        src="https://material.angular.io/assets/img/examples/shiba1.jpg"
-      />
-    </mat-card-title-group>
-    <mat-card-content>
-      {{ longText }}
-    </mat-card-content>
-  </mat-card> -->
 </div>

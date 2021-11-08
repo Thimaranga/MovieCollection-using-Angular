@@ -4,6 +4,13 @@ import { MatDialog } from "@angular/material/dialog";
 import { MatFormFieldControl } from "@angular/material/form-field";
 import { NgForm } from "@angular/forms";
 import { CrudService } from "../services/crud.service";
+import { AngularFirestore } from "@angular/fire/firestore";
+import {
+  AngularFireStorage,
+  AngularFireStorageReference,
+  AngularFireUploadTask,
+} from "@angular/fire/storage";
+import { DomSanitizer } from "@angular/platform-browser";
 
 @Component({
   selector: "app-dashboard",
@@ -24,21 +31,48 @@ export class DashboardComponent implements OnInit {
 
   listedMovies: any;
   listedMovieEdit: any;
-  mId:string;
+  mId: string;
   mName: string;
   mCategory: string;
   mRating: string;
   mDescription: string;
-  mImageURL: string;
+  mImageURL: any;
+  tempUrlForUpdate: any;
+
+  uId;
+  dataProfile = {
+    fName: "",
+    email: "",
+    country: "",
+    mobile: "",
+    uid: "",
+  };
+  record: {
+    title: "";
+    category: "";
+    description: "";
+    rating: "";
+    imageURL: "";
+  };
+
+  task: AngularFireUploadTask;
+  ref: AngularFireStorageReference;
+  persentage;
 
   constructor(
     public afAuth: AngularFireAuth,
     public dialog: MatDialog,
-    public crudservice: CrudService
+    public crudservice: CrudService,
+    private fs: AngularFirestore,
+    private fst: AngularFireStorage,
+    private sanitizer: DomSanitizer
   ) {}
+  public getSantizeUrl(url: string) {
+    return this.sanitizer.bypassSecurityTrustUrl(url);
+  }
 
-  isCheck(form: NgForm){
-    this.searchText=form.value['search'];
+  isCheck(form: NgForm) {
+    this.searchText = form.value["search"];
   }
 
   openDialog() {
@@ -57,7 +91,7 @@ export class DashboardComponent implements OnInit {
 
   onEdit(item) {
     let dialogRef = this.dialog.open(this.callAPIDialogEdit);
-    this.EditRecord(item);
+    this.setEditRecord(item);
     dialogRef.afterClosed().subscribe((result) => {
       if (result !== undefined) {
         if (result !== "no") {
@@ -79,10 +113,13 @@ export class DashboardComponent implements OnInit {
       Record["category"] = form.value["mCategory"];
       Record["rating"] = form.value["mRating"];
       Record["description"] = form.value["mDescription"];
-      Record["imageURL"] = form.value["mImage"];
+      Record["imageURL"] = this.tempUrlForUpdate;
 
-      this.crudservice
-        .addNewMovie(Record)
+      this.fs
+        .collection("Users")
+        .doc(localStorage.getItem("userConnect"))
+        .collection("Movies")
+        .add(Record)
         .then((res) => {
           console.log(form.value);
           this.dialog.closeAll(); // Close opened dialog
@@ -94,57 +131,100 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  EditRecord(Record)
-  {
-    this.mId=Record.id;
+  uploadImage(event) {
+    const id = Math.random().toString(36).substring(2);
+    this.ref = this.fst.ref(id);
+    this.task = this.ref.put(event.target.files[0]);
+    this.persentage = this.task.percentageChanges();
+    this.task.then((data) => {
+      data.ref.getDownloadURL().then((url) => {
+        this.tempUrlForUpdate = url;
+        console.log(url);
+      });
+    });
+  }
+
+  setEditRecord(Record) {
+    this.mId = Record.id;
     this.mName = Record.title;
     this.mCategory = Record.category;
     this.mRating = Record.rating;
     this.mDescription = Record.description;
     this.mImageURL = Record.imageURL;
-
   }
 
   Updatarecord(recorddata) {
-    let record: { };
-    record["title"] = recorddata.editTitle;
-    record["category"] = recorddata.editCategory;
-    record["rating"] = recorddata.editRating;
-    record["description"] = recorddata.editDescription;
-    if(recorddata.editImageUrl!=null){
-      record["imageURL"] = recorddata.editImageUrl;
-    }else{
-      record["imageURL"] = this.mImageURL;
+    let catchData = recorddata.value;
+    let temImg;
+    if (this.tempUrlForUpdate != null) {
+      temImg = this.tempUrlForUpdate;
+    } else {
+      temImg = this.mImageURL;
     }
     console.log(this.mId);
-    return this.crudservice.updateMovie(this.mId, record);
+    return this.fs
+      .collection("Users")
+      .doc(localStorage.getItem("userConnect"))
+      .collection("Movies")
+      .doc(this.mId)
+      .update({
+        title: catchData.eName,
+        category: catchData.eCategory,
+        rating: catchData.eRating,
+        description: catchData.eDescription,
+        imageURL: temImg
+      })
+      .then(() => {
+        this.dialog.closeAll();
+      });
   }
 
-  deleteMovie(recordID){
-    return this.crudservice.deleteMovie(recordID);
+  deleteMovie(recordID) {
+    return this.fs
+      .collection("Users")
+      .doc(localStorage.getItem("userConnect"))
+      .collection("Movies")
+      .doc(recordID)
+      .delete();
   }
 
   ngOnInit(): void {
-    // this.getMovies();
-    this.crudservice.getAllMovies().subscribe((data) => {
-      this.listedMovies = data.map((e) => {
-        return {
-          id: e.payload.doc.id,
-          title: e.payload.doc.data()["title"],
-          category: e.payload.doc.data()["category"],
-          rating: e.payload.doc.data()["rating"],
-          description: e.payload.doc.data()["description"],
-          imageURL: e.payload.doc.data()["imageURL"],
-        };
+    this.fs
+      .collection("Users")
+      .ref.doc(localStorage.getItem("userConnect"))
+      .get()
+      .then((data) => {
+        if (!data) {
+          console.log(data.data());
+          this.dataProfile.fName = data.data()["fName"];
+          this.dataProfile.email = data.data()["email"];
+          this.dataProfile.country = data.data()["country"];
+          this.dataProfile.mobile = data.data()["mobile"];
+          this.dataProfile.uid = data.data()["uid"];
+        } else {
+          console.log("No User Data Recorded");
+        }
       });
-      console.log(this.listedMovies);
-    });
-  }
 
-  // getMovies = () =>
-  //   this.crudservice
-  //     .getAllMovies()
-  //     .subscribe((res) => (this.listedMovies = res));
+    this.fs
+      .collection("Users")
+      .doc(localStorage.getItem("userConnect"))
+      .collection("Movies")
+      .snapshotChanges()
+      .subscribe((data) => {
+        this.listedMovies = data.map((e) => {
+          return {
+            id: e.payload.doc.id,
+            title: e.payload.doc.data()["title"],
+            category: e.payload.doc.data()["category"],
+            rating: e.payload.doc.data()["rating"],
+            description: e.payload.doc.data()["description"],
+            imageURL: e.payload.doc.data()["imageURL"],
+          };
+        });
+        console.log(this.listedMovies);
+      });
+  }
 
   logout(): void {
     this.afAuth.signOut();

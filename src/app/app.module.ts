@@ -11,6 +11,7 @@ import { LoginComponent } from "./login/login.component";
 import { DashboardComponent } from "./dashboard/dashboard.component";
 
 import { AngularFireModule } from "@angular/fire";
+import {AngularFireStorageModule} from "@angular/fire/storage"
 import { AngularFireDatabaseModule } from "@angular/fire/database";
 import { AngularFirestoreModule } from "@angular/fire/firestore";
 import { environment } from "../environments/environment";
@@ -42,6 +43,7 @@ import {CrudService} from "./services/crud.service"
     AngularFireModule.initializeApp(environment.firebase), // imports firebase/app needed for everything
     AngularFireDatabaseModule,
     AngularFirestoreModule,
+    AngularFireStorageModule,
 
     MatButtonModule,
     MatCardModule,
