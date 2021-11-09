@@ -13,12 +13,15 @@
   
   }
   .card {
-    max-width: 380px;
+    width: 400px;
     transition: all 0.2s ease-in-out;
     line-height: 24px;
     margin-bottom: 8px;
     border-radius: 10px;
     background-color: rgba(193, 200, 201, 0.281);
+  }
+  .card-title{
+    width: 100px;
   }
   
   .card-container .card:not(:last-child) {

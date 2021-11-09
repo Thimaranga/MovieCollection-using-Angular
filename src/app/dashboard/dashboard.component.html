@@ -231,12 +231,13 @@
     class="card mr-lg-4"
     *ngFor="let item of listedMovies | filter: searchText"
   >
-    <mat-card-title-group>
-      <mat-card-title
+    <mat-card-title-group >
+      <mat-card-title  class="card-title"
         ><b>{{ item.title }}</b></mat-card-title
       >
       <mat-card-subtitle>{{ item.category }}</mat-card-subtitle>
-      <img mat-card-xl-image [src]="getSantizeUrl(item.imageURL)" />
+      <mat-card-subtitle>IMDb : {{ item.rating }}/10</mat-card-subtitle>
+      <img mat-card-xl-image [src]="getSantizeUrl(item.imageURL)"/>
     </mat-card-title-group>
     <mat-card-content>
       {{ item.description }}

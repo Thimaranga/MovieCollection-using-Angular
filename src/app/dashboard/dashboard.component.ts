@@ -11,6 +11,9 @@ import {
   AngularFireUploadTask,
 } from "@angular/fire/storage";
 import { DomSanitizer } from "@angular/platform-browser";
+import { Observable } from "rxjs";
+import { Router } from "@angular/router";
+import { DatePipe } from "@angular/common";
 
 @Component({
   selector: "app-dashboard",
@@ -57,7 +60,11 @@ export class DashboardComponent implements OnInit {
 
   task: AngularFireUploadTask;
   ref: AngularFireStorageReference;
-  persentage;
+  persentage: Observable<number>;
+
+  userLoggedIn: boolean;
+
+  datePipe: DatePipe = new DatePipe('en-US');
 
   constructor(
     public afAuth: AngularFireAuth,
@@ -65,8 +72,28 @@ export class DashboardComponent implements OnInit {
     public crudservice: CrudService,
     private fs: AngularFirestore,
     private fst: AngularFireStorage,
-    private sanitizer: DomSanitizer
-  ) {}
+    private sanitizer: DomSanitizer,
+    private router:Router
+  ) {
+    this.userLoggedIn = false;
+
+    this.afAuth.onAuthStateChanged((user) => {
+      if (!user) {
+        this.userLoggedIn = true;
+      } else {
+        this.userLoggedIn = false;
+      }
+    });
+  }
+
+  getformattedDate(){
+    
+    var date = new Date();
+    var transformDate = this.datePipe.transform(date, 'yyyy-MM-dd');
+    return transformDate;
+
+  }
+
   public getSantizeUrl(url: string) {
     return this.sanitizer.bypassSecurityTrustUrl(url);
   }
@@ -114,6 +141,7 @@ export class DashboardComponent implements OnInit {
       Record["rating"] = form.value["mRating"];
       Record["description"] = form.value["mDescription"];
       Record["imageURL"] = this.tempUrlForUpdate;
+      Record["modifyDate"] = this.getformattedDate();
 
       this.fs
         .collection("Users")
@@ -172,7 +200,8 @@ export class DashboardComponent implements OnInit {
         category: catchData.eCategory,
         rating: catchData.eRating,
         description: catchData.eDescription,
-        imageURL: temImg
+        imageURL: temImg,
+        modifyDate:this.getformattedDate()
       })
       .then(() => {
         this.dialog.closeAll();
@@ -189,6 +218,12 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (!this.userLoggedIn) {
+      this.router.navigate(["/dashboard"]);
+    } else {
+      this.router.navigate([""]);
+    }
+
     this.fs
       .collection("Users")
       .ref.doc(localStorage.getItem("userConnect"))

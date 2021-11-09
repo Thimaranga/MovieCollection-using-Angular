@@ -14,6 +14,7 @@ import { AngularFirestore } from "@angular/fire/firestore";
 export class SignupComponent implements OnInit {
   signupForm: FormGroup;
   firebaseErrorMessage: string;
+  userLoggedIn: boolean;
 
   constructor(
     private authService: AuthService,
@@ -22,16 +23,19 @@ export class SignupComponent implements OnInit {
     private fs: AngularFirestore
   ) {
     this.firebaseErrorMessage = "";
+
+    this.userLoggedIn = false;
+
+        this.afAuth.onAuthStateChanged((user) => {
+          if (!user) {
+            this.userLoggedIn = true;
+          } else {
+            this.userLoggedIn = false;
+          }
+        });
   }
 
   ngOnInit(): void {
-    // this.signupForm = new FormGroup({
-    //   displayName: new FormControl("", Validators.required),
-    //   email: new FormControl("", [Validators.required, Validators.email]),
-    //   password: new FormControl("", Validators.required),
-    //   phone: new FormControl("", Validators.required),
-    //   address: new FormControl("", Validators.required),
-    // });
   }
 
   signup(f: NgForm) {

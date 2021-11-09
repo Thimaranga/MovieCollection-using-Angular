@@ -11,32 +11,40 @@ import { AngularFireAuth } from "@angular/fire/auth";
   styleUrls: ["./login.component.css"],
 })
 export class LoginComponent implements OnInit {
-
-  messageError
-
+  messageError: string;
+  userLoggedIn: boolean;
 
   constructor(
     private authService: AuthService,
     private router: Router,
+    private af: AngularFireAuth
   ) {
-    // this.loginForm = new FormGroup({
-    //   email: new FormControl("", [Validators.required, Validators.email]),
-    //   password: new FormControl("", Validators.required),
-    // });
+    this.userLoggedIn = false;
+
+    this.af.onAuthStateChanged((user) => {
+      if (!user) {
+        this.userLoggedIn = true;
+      } else {
+        this.userLoggedIn = false;
+      }
+    });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    
+  }
 
   loginUser(f) {
     let data = f.value;
     this.authService
-      .loginUser(data.email,data.pass)
+      .loginUser(data.email, data.pass)
       .then((result) => {
-          console.log("logging in...");
-          localStorage.setItem("userConnect",result.user.uid);
-          this.router.navigate(["/dashboard"]);
-      }).catch(()=>{
-          this.messageError="Incorrect email and password"
+        console.log("logging in...");
+        localStorage.setItem("userConnect", result.user.uid);
+        this.router.navigate(["/dashboard"]);
+      })
+      .catch(() => {
+        this.messageError = "Incorrect email and password";
       });
   }
 }
